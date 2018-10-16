@@ -33,9 +33,19 @@ export abstract class BaseApplication {
     })
   }
 
-  start (): void {
+  /**
+   * Start Command line Application
+   *
+   * @param {boolean} [doParse=true] use directly parse
+   * @param {any} [parseElement=process.argv] parsable value for caporal
+   * @returns caporal raw object
+   * @memberof BaseApplication
+   */
+  start (doParse: boolean = true, parseElement: any = process.argv): Caporal {
     caporal.version(this.version)
     this.commands.forEach(cmd => this.injectCaporal(caporal, cmd))
-    caporal.parse(process.argv)
+    if (doParse) caporal.parse(parseElement)
+
+    return caporal
   }
 }

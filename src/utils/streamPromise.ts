@@ -1,3 +1,5 @@
+import _ from 'caporal'
+
 /**
  * Wrap Stream to Promise.
  * it ignores emitted data, and when it close or end returned promise will resolved
