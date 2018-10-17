@@ -4,10 +4,12 @@ import util from 'util'
 import { BaseCommand, KVMap } from '../abstraction/BaseCommand'
 import generateUUID from '../utils/generateUuid'
 import streamPromise from '../utils/streamPromise'
+import { removeFileOrDirectory } from '../utils/removeFileOrDirectory'
+import { sleep } from '../utils/sleep'
 
 const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
-const removeFile = util.promisify(fs.unlink)
+const createDirectory = util.promisify(fs.mkdir)
 
 type TagCallback = ((tag: string) => string)
 type TagValue = string | TagCallback
@@ -91,6 +93,7 @@ export abstract class BuildImageCommand extends BaseCommand {
     logger.info(`${remains} Images remained.`)
     logger.info('------------------------------------------')
 
+    await createDirectory('./.tmp')
     await Promise.all(
       this.tags.map(tag => ({ tag, uuid: generateUUID() })).map(async t => {
         const { tag, uuid } = t
@@ -105,7 +108,7 @@ export abstract class BuildImageCommand extends BaseCommand {
 
         // write
         const fileName = `Dockerfile-tmp-${uuid}`
-        await writeFile('./' + fileName, template, 'utf8')
+        await writeFile('./.tmp/' + fileName, template, 'utf8')
 
         try {
           // build
@@ -122,12 +125,10 @@ export abstract class BuildImageCommand extends BaseCommand {
 
           // await build stream and remove
           await streamPromise(stream, logger)
-          await removeFile('./' + fileName)
         } catch (err) {
           // log it and remove temporary file
           logger.error(err)
           logger.error(err.stack)
-          await removeFile('./' + fileName)
         }
 
         logger.info(`Building Image [${tag}] finished.`)
@@ -136,5 +137,10 @@ export abstract class BuildImageCommand extends BaseCommand {
         logger.info('------------------------------------------')
       })
     )
+
+    await sleep(3000)
+    await removeFileOrDirectory('./.tmp/')
+    logger.info('All Temporary Files are removed.')
+    logger.info('------------------------------------------')
   }
 }
