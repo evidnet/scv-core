@@ -30,9 +30,7 @@ export abstract class PublishImageCommand extends BaseCommand {
     return new Map([
       ['<username>', 'ID of custom registry.'],
       ['<password>', 'Password of custom registry.'],
-      ['<registry>', "Remote Registry's address."],
-      ['[rootProject]', "Root Project's name."],
-      ['[project]', "Inner Project's name"]
+      ['<registry>', "Remote Registry's address."]
     ])
   }
 
