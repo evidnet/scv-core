@@ -9,6 +9,9 @@ const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
 const removeFile = util.promisify(fs.unlink)
 
+type TagCallback = ((tag: string) => string)
+type TagValue = string | TagCallback
+
 /**
  * Command for Base Build Definition for Docker Image.
  *
@@ -17,15 +20,15 @@ const removeFile = util.promisify(fs.unlink)
  * @class BuildImageCommand
  * @extends {BaseCommand}
  */
-export default abstract class BuildImageCommand extends BaseCommand {
+export abstract class BuildImageCommand extends BaseCommand {
   /**
    * Map for substitute template code.
    *
    * @abstract
-   * @type {Map<string, string>}
+   * @type {Map<string, TagValue>}
    * @memberof BuildImageCommand
    */
-  abstract substituteMap: Map<string, string>
+  abstract substituteMap: Map<string, TagValue>
 
   /**
    * Tag List to Build Docker Image.
@@ -89,7 +92,11 @@ export default abstract class BuildImageCommand extends BaseCommand {
 
         // read and substitute
         let template = await readFile(this.dockerFile, 'utf8')
-        this.substituteMap.forEach((value, key) => (template = template.split(key).join(value)))
+        this.substituteMap.forEach((value, key) => {
+          // check if it is function, evaluate it.
+          const result = typeof value === 'function' ? value.apply(null, [tag]) : value
+          template = template.split(key).join(result)
+        })
 
         // write
         const fileName = `Dockerfile-tmp-${uuid}`
@@ -112,14 +119,15 @@ export default abstract class BuildImageCommand extends BaseCommand {
           await streamPromise(stream, logger)
           await removeFile('./' + fileName)
         } catch (err) {
+          // log it and remove temporary file
           logger.error(err)
           logger.error(err.stack)
           await removeFile('./' + fileName)
         }
 
         logger.info(`Building Image [${tag}] finished.`)
-        if (--remains > 0) logger.info(`${remains} Images remained.`)
-        else logger.info(`No More Remained. Build Finished.`)
+        logger.info(--remains > 0 ? `${remains} Images remained.` :
+                                    `No More Remained. Build Finished.`)
         logger.info('------------------------------------------')
       })
     )

@@ -10,7 +10,7 @@ import streamPromise from '../utils/streamPromise'
  * @class PublishCommand
  * @extends {BaseCommand}
  */
-export abstract class PublishCommand extends BaseCommand {
+export abstract class PublishImageCommand extends BaseCommand {
   abstract rootProject: string
   abstract project: string
 
