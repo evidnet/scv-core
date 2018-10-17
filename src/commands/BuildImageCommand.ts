@@ -22,6 +22,14 @@ type TagValue = string | TagCallback
  */
 export abstract class BuildImageCommand extends BaseCommand {
   /**
+   * Base Image for build. Default is 64-bit Ubuntu 18.04
+   *
+   * @type {string}
+   * @memberof BuildImageCommand
+   */
+  baseProject: string = 'amd64/ubuntu:18.04'
+
+  /**
    * Map for substitute template code.
    *
    * @abstract
@@ -71,13 +79,10 @@ export abstract class BuildImageCommand extends BaseCommand {
   }
 
   getArguments (): Map<string, string> {
-    return new Map<string, string>([['[baseProject]', "Base Project's name."]])
+    return new Map<string, string>()
   }
 
-  async onEvaluated (args: KVMap, _: KVMap, logger: Logger): Promise<void> {
-    let { baseProject } = args
-    if (!baseProject) baseProject = 'amd64/ubuntu:18.04'
-
+  async onEvaluated (_: KVMap, __: KVMap, logger: Logger): Promise<void> {
     let remains = this.tags.length
     const docker = new Docker()
 

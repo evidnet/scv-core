@@ -67,8 +67,8 @@ export abstract class PublishImageCommand extends BaseCommand {
           await streamPromise(stream, logger)
 
           logger.info(`Deploying Image [${newPath}] finished.`)
-          if (--remains > 0) logger.info(`${remains} Images remained.`)
-          else logger.info(`No More Remained. Deployment Finished.`)
+          logger.info(--remains > 0 ? `${remains} Images remained.` :
+                                      `No More Remained. Deployment Finished.`)
           logger.info('------------------------------------------')
         })
     )
