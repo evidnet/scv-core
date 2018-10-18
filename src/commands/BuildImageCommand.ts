@@ -1,5 +1,6 @@
 import Docker from 'dockerode'
 import fs from 'fs'
+import path from 'path'
 import util from 'util'
 import { BaseCommand, KVMap } from '../abstraction/BaseCommand'
 import generateUUID from '../utils/generateUuid'
@@ -11,8 +12,8 @@ const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
 const createDirectory = util.promisify(fs.mkdir)
 
-type TagCallback = ((tag?: string, args?: KVMap, options?: KVMap) => string)
-type TagValue = string | TagCallback
+export type TagCallback = ((tag?: string, args?: KVMap, options?: KVMap) => string)
+export type TagValue = string | TagCallback
 
 /**
  * Command for Base Build Definition for Docker Image.
@@ -87,13 +88,20 @@ export abstract class BuildImageCommand extends BaseCommand {
   async onEvaluated (args: KVMap, options: KVMap, logger: Logger): Promise<void> {
     let remains = this.tags.length
     const docker = new Docker()
+    const tempPath = path.join(process.cwd(), './.tmp/')
 
     logger.info('------------------------------------------')
     logger.info('Start to build container images...')
     logger.info(`${remains} Images remained.`)
     logger.info('------------------------------------------')
 
-    await createDirectory('./.tmp')
+    try {
+      await removeFileOrDirectory(tempPath)
+    } catch (_) {
+      // ignored
+    }
+
+    await createDirectory(tempPath)
     await Promise.all(
       this.tags.map(tag => ({ tag, uuid: generateUUID() })).map(async ({ tag, uuid }) => {
         // read and substitute
@@ -106,14 +114,14 @@ export abstract class BuildImageCommand extends BaseCommand {
 
         // write
         const fileName = `Dockerfile-tmp-${uuid}`
-        await writeFile('./.tmp/' + fileName, template, 'utf8')
+        await writeFile(path.join(tempPath, fileName), template, 'utf8')
 
         try {
           // build
           const stream = await docker.buildImage(
             {
-              context: process.cwd(),
-              src: ['./.tmp/' + fileName]
+              context: tempPath,
+              src: [fileName]
             },
             {
               t: `${this.imageName}:v${tag}`,
@@ -137,7 +145,7 @@ export abstract class BuildImageCommand extends BaseCommand {
     )
 
     await sleep(3000)
-    await removeFileOrDirectory('./.tmp/')
+    await removeFileOrDirectory(tempPath)
     logger.info('All Temporary Files are removed.')
     logger.info('------------------------------------------')
   }
