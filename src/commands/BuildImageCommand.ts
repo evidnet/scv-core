@@ -11,7 +11,7 @@ const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
 const createDirectory = util.promisify(fs.mkdir)
 
-type TagCallback = ((tag: string) => string)
+type TagCallback = ((tag?: string, args?: KVMap, options?: KVMap) => string)
 type TagValue = string | TagCallback
 
 /**
@@ -84,7 +84,7 @@ export abstract class BuildImageCommand extends BaseCommand {
     return new Map<string, string>()
   }
 
-  async onEvaluated (_: KVMap, __: KVMap, logger: Logger): Promise<void> {
+  async onEvaluated (args: KVMap, options: KVMap, logger: Logger): Promise<void> {
     let remains = this.tags.length
     const docker = new Docker()
 
@@ -95,14 +95,12 @@ export abstract class BuildImageCommand extends BaseCommand {
 
     await createDirectory('./.tmp')
     await Promise.all(
-      this.tags.map(tag => ({ tag, uuid: generateUUID() })).map(async t => {
-        const { tag, uuid } = t
-
+      this.tags.map(tag => ({ tag, uuid: generateUUID() })).map(async ({ tag, uuid }) => {
         // read and substitute
         let template = await readFile(this.dockerFile, 'utf8')
         this.substituteMap.forEach((value, key) => {
           // check if it is function, evaluate it.
-          const result = typeof value === 'function' ? value.apply(null, [tag]) : value
+          const result = typeof value === 'function' ? value.apply(null, [tag, args, options]) : value
           template = template.split(key).join(result)
         })
 
