@@ -113,7 +113,7 @@ export abstract class BuildImageCommand extends BaseCommand {
           const stream = await docker.buildImage(
             {
               context: process.cwd(),
-              src: [fileName]
+              src: ['./.tmp/' + fileName]
             },
             {
               t: `${this.imageName}:v${tag}`,
