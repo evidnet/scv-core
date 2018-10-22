@@ -104,11 +104,17 @@ export abstract class BuildImageCommand extends BaseCommand {
       this.tags.map(tag => ({ tag, uuid: generateUUID() })).map(async ({ tag, uuid }) => {
         // read and substitute
         let template = await readFile(this.dockerFile, 'utf8')
-        this.substituteMap.forEach((value, key) => {
+        for (let [key, value] of this.substituteMap.entries()) {
           // check if it is function, evaluate it.
           const result = typeof value === 'function' ? value.apply(null, [tag, args, options]) : value
-          template = template.split(key).join(result)
-        })
+
+          // check if it is promise, just await it.
+          if (Promise.resolve(result) === result) {
+            template = template.split(key).join(await result)
+          } else {
+            template = template.split(key).join(result)
+          }
+        }
 
         // write
         const fileName = `Dockerfile-tmp-${uuid}`
