@@ -3,9 +3,9 @@ import fs from 'fs'
 import path from 'path'
 import util from 'util'
 import { BaseCommand } from '../abstraction/BaseCommand'
-import { KVMap, TagValue, OptionModel } from '../abstraction/BaseTypes'
+import { KVMap, OptionModel, TagValue } from '../abstraction/BaseTypes'
+import { remove } from '../utils/fileUtils'
 import generateUUID from '../utils/generateUuid'
-import { remove, ls, copy } from '../utils/fileUtils'
 import { sleep } from '../utils/sleep'
 import streamPromise from '../utils/streamPromise'
 
@@ -65,7 +65,7 @@ export abstract class BuildImageCommand extends BaseCommand {
    * @type {string}
    * @memberof BuildImageCommand
    */
-  dockerFile: string = './assets/Dockerfile.template'
+  abstract dockerFile: string
 
   getCommandName (): string {
     return 'build'
@@ -100,10 +100,6 @@ export abstract class BuildImageCommand extends BaseCommand {
     }
 
     await createDirectory(tempPath)
-
-    // copy assets without templates.
-    const list = await ls('./assets')
-    await Promise.all(list.filter(file => !file.endsWith('.template')).map(file => copy(file, tempPath)))
 
     await Promise.all(
       this.tags.map(tag => ({ tag, uuid: generateUUID() })).map(async ({ tag, uuid }) => {

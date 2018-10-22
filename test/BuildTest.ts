@@ -2,7 +2,7 @@ import test from 'ava'
 import caporal from 'caporal'
 import path from 'path'
 import { BuildImageCommand } from '../src/commands/BuildImageCommand'
-import { removeFileOrDirectory } from '../src/utils/removeFileOrDirectory'
+import { remove } from '../src/utils/fileUtils'
 import { TagValue, OptionModel } from '../src/abstraction/BaseTypes'
 
 class TestCommand extends BuildImageCommand {
@@ -25,7 +25,7 @@ class TestCommand extends BuildImageCommand {
 
 test.before(async t => {
   const tempPath = path.join(process.cwd(), './.tmp/')
-  await removeFileOrDirectory(tempPath)
+  await remove(tempPath)
 })
 
 test('Building Test Dockerfile.', async t => {
