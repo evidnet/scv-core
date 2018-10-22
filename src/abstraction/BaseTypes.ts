@@ -1,3 +1,8 @@
+import _ from 'caporal'
+
+// export caporal's logger
+export type Log = Logger
+
 export interface OptionModel {
   key: string
   description: string
