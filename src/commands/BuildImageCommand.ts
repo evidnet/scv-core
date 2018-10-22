@@ -83,6 +83,10 @@ export abstract class BuildImageCommand extends BaseCommand {
     return []
   }
 
+  getSources (): Array<string> {
+    return []
+  }
+
   async baseEvaluated (args: KVMap, options: KVMap, logger: Logger): Promise<void> {
     let remains = this.tags.length
     const docker = new Docker()
@@ -123,7 +127,7 @@ export abstract class BuildImageCommand extends BaseCommand {
           const stream = await docker.buildImage(
             {
               context: tempPath,
-              src: [fileName]
+              src: [].concat.apply([], [fileName, this.getSources()])
             },
             {
               t: `${this.imageName}:v${tag}`,
