@@ -17,7 +17,13 @@ export abstract class BaseApplication {
       .command(command.getCommandName(), command.getCommandDescription())
       .alias(command.getCommandAlias())
 
-    command.getArguments().forEach((value, key) => caporalCommand.argument(key, value))
+    command.getArguments().forEach(({ key, description, defaultValue }) => {
+      caporalCommand.argument(key, description, defaultValue)
+    })
+
+    command.getOptions().forEach(({ key, description, required, defaultValue }) => {
+      caporalCommand.option(key, description, undefined, defaultValue, required)
+    })
 
     caporalCommand.action(async (args, options, logger) => {
       const result = command.onEvaluated(args, options, logger)

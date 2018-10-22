@@ -2,18 +2,16 @@ import Docker from 'dockerode'
 import fs from 'fs'
 import path from 'path'
 import util from 'util'
-import { BaseCommand, KVMap } from '../abstraction/BaseCommand'
+import { BaseCommand } from '../abstraction/BaseCommand'
+import { KVMap, TagValue, OptionModel } from '../abstraction/BaseTypes'
 import generateUUID from '../utils/generateUuid'
-import streamPromise from '../utils/streamPromise'
 import { removeFileOrDirectory } from '../utils/removeFileOrDirectory'
 import { sleep } from '../utils/sleep'
+import streamPromise from '../utils/streamPromise'
 
 const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
 const createDirectory = util.promisify(fs.mkdir)
-
-export type TagCallback = ((tag?: string, args?: KVMap, options?: KVMap) => string)
-export type TagValue = string | TagCallback
 
 /**
  * Command for Base Build Definition for Docker Image.
@@ -81,8 +79,8 @@ export abstract class BuildImageCommand extends BaseCommand {
     return 'Build Docker Images'
   }
 
-  getArguments (): Map<string, string> {
-    return new Map<string, string>()
+  getArguments (): Array<OptionModel> {
+    return []
   }
 
   async onEvaluated (args: KVMap, options: KVMap, logger: Logger): Promise<void> {

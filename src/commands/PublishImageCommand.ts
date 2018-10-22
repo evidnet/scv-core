@@ -1,5 +1,6 @@
 import Docker from 'dockerode'
-import { BaseCommand, KVMap } from '../abstraction/BaseCommand'
+import { BaseCommand } from '../abstraction/BaseCommand'
+import { KVMap, OptionModel } from '../abstraction/BaseTypes'
 import streamPromise from '../utils/streamPromise'
 
 /**
@@ -26,12 +27,21 @@ export abstract class PublishImageCommand extends BaseCommand {
     return 'Publish images to remote registry.'
   }
 
-  getArguments (): Map<string, string> {
-    return new Map([
-      ['<username>', 'ID of custom registry.'],
-      ['<password>', 'Password of custom registry.'],
-      ['<registry>', "Remote Registry's address."]
-    ])
+  getArguments (): Array<OptionModel> {
+    return [
+      {
+        key: '<username>',
+        description: 'ID of custom registry.'
+      },
+      {
+        key: '<password>',
+        description: 'Password of custom registry.'
+      },
+      {
+        key: '<registry>',
+        description: "Remote Registry's address."
+      }
+    ]
   }
 
   async onEvaluated (args: KVMap, _: KVMap, logger: Logger): Promise<void> {

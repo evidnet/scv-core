@@ -1,7 +1,8 @@
 import test from 'ava'
 
 import { BaseApplication } from '../src/abstraction/BaseApplication'
-import { BaseCommand, KVMap } from '../src/abstraction/BaseCommand'
+import { BaseCommand } from '../src/abstraction/BaseCommand'
+import { OptionModel, KVMap } from '../src/abstraction/BaseTypes'
 
 class TestApplication extends BaseApplication {
   version: string = 'v1.0.0'
@@ -21,8 +22,12 @@ class TestCommand extends BaseCommand {
     return 'test command'
   }
 
-  getArguments (): Map<string, string> {
-    return new Map()
+  getArguments (): Array<OptionModel> {
+    return []
+  }
+
+  getOptions (): Array<OptionModel> {
+    return []
   }
 
   onEvaluated (args: KVMap, options: KVMap, logger: Logger) {

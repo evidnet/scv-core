@@ -1,4 +1,4 @@
-export type KVMap = { [k: string]: any }
+import { OptionModel, KVMap } from './BaseTypes'
 
 /**
  * Base Command's Abstracted Class Definition.
@@ -36,15 +36,22 @@ export abstract class BaseCommand {
   abstract getCommandDescription (): string
 
   /**
-   * Define Command's Arguments.
-   * See also {https://github.com/mattallty/Caporal.js#argumentsynopsis-description-validator-defaultvalue---command}
-   * Key: synopsis, Value: description
+   * Define Command's Arguments
    *
    * @abstract
-   * @returns {string}
+   * @returns {Array<OptionModel>}
    * @memberof BaseCommand
    */
-  abstract getArguments (): Map<string, string>
+  abstract getArguments (): Array<OptionModel>
+
+  /**
+   * Define Command's Options
+   *
+   * @abstract
+   * @returns {Array<OptionModel>}
+   * @memberof BaseCommand
+   */
+  abstract getOptions (): Array<OptionModel>
 
   /**
    * Callback when command evaluated.
