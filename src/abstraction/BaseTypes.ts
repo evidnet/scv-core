@@ -1,7 +1,10 @@
-import _ from 'caporal'
-
-// export caporal's logger
-export type Log = Logger
+export interface Logger {
+  debug (str: string): void
+  info (str: string): void
+  log (str: string): void
+  warn (str: string): void
+  error (str: string): void
+}
 
 export interface OptionModel {
   key: string

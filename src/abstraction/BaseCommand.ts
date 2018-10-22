@@ -1,4 +1,4 @@
-import { OptionModel, KVMap } from './BaseTypes'
+import { OptionModel, KVMap, Logger } from './BaseTypes'
 
 /**
  * Base Command's Abstracted Class Definition.

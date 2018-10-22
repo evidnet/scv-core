@@ -3,7 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import util from 'util'
 import { BaseCommand } from '../abstraction/BaseCommand'
-import { KVMap, OptionModel, TagValue, Log } from '../abstraction/BaseTypes'
+import { KVMap, Logger, OptionModel, TagValue } from '../abstraction/BaseTypes'
 import { remove } from '../utils/fileUtils'
 import generateUUID from '../utils/generateUuid'
 import { sleep } from '../utils/sleep'
@@ -71,7 +71,7 @@ export abstract class BuildImageCommand extends BaseCommand {
     return 'build'
   }
 
-  getCommandAliases (): string[] {
+  getCommandAliases (): Array<string> {
     return ['b']
   }
 
@@ -83,7 +83,18 @@ export abstract class BuildImageCommand extends BaseCommand {
     return []
   }
 
-  async onEvaluated (args: KVMap, options: KVMap, logger: Log): Promise<void> {
+  /**
+   * Get sources for Build Docker Image.
+   * (Dockerfile is already registered.)
+   *
+   * @returns {Array<string>}
+   * @memberof BuildImageCommand
+   */
+  getSources (): Array<string> {
+    return []
+  }
+
+  async onEvaluated (args: KVMap, options: KVMap, logger: Logger): Promise<void> {
     let remains = this.tags.length
     const docker = new Docker()
     const tempPath = path.join(process.cwd(), './.tmp/')
@@ -131,7 +142,7 @@ export abstract class BuildImageCommand extends BaseCommand {
           const stream = await docker.buildImage(
             {
               context: tempPath,
-              src: [fileName]
+              src: [].concat.apply([], [fileName, this.getSources()])
             },
             {
               t: `${this.imageName}:v${tag}`,

@@ -1,6 +1,6 @@
 import Docker from 'dockerode'
 import { BaseCommand } from '../abstraction/BaseCommand'
-import { KVMap, OptionModel } from '../abstraction/BaseTypes'
+import { KVMap, OptionModel, Logger } from '../abstraction/BaseTypes'
 import streamPromise from '../utils/streamPromise'
 
 /**
