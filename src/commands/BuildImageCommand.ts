@@ -5,7 +5,7 @@ import util from 'util'
 import { BaseCommand } from '../abstraction/BaseCommand'
 import { KVMap, TagValue, OptionModel } from '../abstraction/BaseTypes'
 import generateUUID from '../utils/generateUuid'
-import { removeFileOrDirectory } from '../utils/removeFileOrDirectory'
+import { remove, ls, copy } from '../utils/fileUtils'
 import { sleep } from '../utils/sleep'
 import streamPromise from '../utils/streamPromise'
 
@@ -65,7 +65,7 @@ export abstract class BuildImageCommand extends BaseCommand {
    * @type {string}
    * @memberof BuildImageCommand
    */
-  abstract dockerFile: string
+  dockerFile: string = './assets/Dockerfile.template'
 
   getCommandName (): string {
     return 'build'
@@ -94,24 +94,34 @@ export abstract class BuildImageCommand extends BaseCommand {
     logger.info('------------------------------------------')
 
     try {
-      await removeFileOrDirectory(tempPath)
+      await remove(tempPath)
     } catch (_) {
       // ignored
     }
 
     await createDirectory(tempPath)
+
+    // copy assets without templates.
+    const list = await ls('./assets')
+    await Promise.all(list.filter(file => !file.endsWith('.template')).map(file => copy(file, tempPath)))
+
     await Promise.all(
       this.tags.map(tag => ({ tag, uuid: generateUUID() })).map(async ({ tag, uuid }) => {
         // read and substitute
         let template = await readFile(this.dockerFile, 'utf8')
+
+        logger.debug('Progress in Rendering Template.')
         for (let [key, value] of this.substituteMap.entries()) {
           // check if it is function, evaluate it.
           const result = typeof value === 'function' ? value.apply(null, [tag, args, options]) : value
 
           // check if it is promise, just await it.
           if (Promise.resolve(result) === result) {
-            template = template.split(key).join(await result)
+            const value = await result
+            logger.debug(` - Key: ${key}, Value: ${value}`)
+            template = template.split(key).join(value)
           } else {
+            logger.debug(` - Key: ${key}, Value: ${result}`)
             template = template.split(key).join(result)
           }
         }
@@ -142,14 +152,13 @@ export abstract class BuildImageCommand extends BaseCommand {
         }
 
         logger.info(`Building Image [${tag}] finished.`)
-        logger.info(--remains > 0 ? `${remains} Images remained.` :
-                                    `No More Remained. Build Finished.`)
+        logger.info(--remains > 0 ? `${remains} Images remained.` : `No More Remained. Build Finished.`)
         logger.info('------------------------------------------')
       })
     )
 
     await sleep(3000)
-    await removeFileOrDirectory(tempPath)
+    await remove(tempPath)
     logger.info('All Temporary Files are removed.')
     logger.info('------------------------------------------')
   }
