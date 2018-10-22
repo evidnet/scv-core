@@ -3,7 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import util from 'util'
 import { BaseCommand } from '../abstraction/BaseCommand'
-import { KVMap, Logger, OptionModel, TagValue } from '../abstraction/BaseTypes'
+import { KVMap, OptionModel, TagValue, Log } from '../abstraction/BaseTypes'
 import { remove } from '../utils/fileUtils'
 import generateUUID from '../utils/generateUuid'
 import { sleep } from '../utils/sleep'
@@ -71,7 +71,7 @@ export abstract class BuildImageCommand extends BaseCommand {
     return 'build'
   }
 
-  getCommandAliases (): Array<string> {
+  getCommandAliases (): string[] {
     return ['b']
   }
 
@@ -83,18 +83,7 @@ export abstract class BuildImageCommand extends BaseCommand {
     return []
   }
 
-  /**
-   * Get sources for Build Docker Image.
-   * (Dockerfile is already registered.)
-   *
-   * @returns {Array<string>}
-   * @memberof BuildImageCommand
-   */
-  getSources (): Array<string> {
-    return []
-  }
-
-  async onEvaluated (args: KVMap, options: KVMap, logger: Logger): Promise<void> {
+  async baseEvaluated (args: KVMap, options: KVMap, logger: Log): Promise<void> {
     let remains = this.tags.length
     const docker = new Docker()
     const tempPath = path.join(process.cwd(), './.tmp/')
@@ -103,12 +92,6 @@ export abstract class BuildImageCommand extends BaseCommand {
     logger.info('Start to build container images...')
     logger.info(`${remains} Images remained.`)
     logger.info('------------------------------------------')
-
-    try {
-      await remove(tempPath)
-    } catch (_) {
-      // ignored
-    }
 
     await createDirectory(tempPath)
 
@@ -142,7 +125,7 @@ export abstract class BuildImageCommand extends BaseCommand {
           const stream = await docker.buildImage(
             {
               context: tempPath,
-              src: [].concat.apply([], [fileName, this.getSources()])
+              src: [fileName]
             },
             {
               t: `${this.imageName}:v${tag}`,
@@ -168,5 +151,17 @@ export abstract class BuildImageCommand extends BaseCommand {
     await remove(tempPath)
     logger.info('All Temporary Files are removed.')
     logger.info('------------------------------------------')
+  }
+
+  async onEvaluated (args: KVMap, options: KVMap, logger: Log): Promise<void> {
+    const tempPath = path.join(process.cwd(), './.tmp/')
+
+    try {
+      await remove(tempPath)
+    } catch (_) {
+      // ignored
+    }
+
+    return this.baseEvaluated(args, options, logger)
   }
 }
