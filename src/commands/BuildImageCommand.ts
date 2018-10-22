@@ -93,8 +93,6 @@ export abstract class BuildImageCommand extends BaseCommand {
     logger.info(`${remains} Images remained.`)
     logger.info('------------------------------------------')
 
-    await createDirectory(tempPath)
-
     await Promise.all(
       this.tags.map(tag => ({ tag, uuid: generateUUID() })).map(async ({ tag, uuid }) => {
         // read and substitute
@@ -162,6 +160,7 @@ export abstract class BuildImageCommand extends BaseCommand {
       // ignored
     }
 
+    await createDirectory(tempPath)
     return this.baseEvaluated(args, options, logger)
   }
 }
