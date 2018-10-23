@@ -6,6 +6,30 @@ export interface Logger {
   error (str: string): void
 }
 
+export interface Command {
+  help (helpText: string, helpOptions?: helpOptions): Command
+
+  argument (synopsis: string, description: string, validator?: ValidatorArg, defaultValue?: any): Command
+
+  command (synospis: string, description: string): Command
+
+  option (
+    synopsis: string,
+    description: string,
+    validator?: ValidatorArg,
+    defaultValue?: any,
+    required?: boolean
+  ): Command
+
+  action (cb: ActionCallback): Command
+
+  alias (alias: string): Command
+
+  complete (cb: AutocompleteCallback): Command
+}
+
+export type AutocompleteCallback = () => string[] | Promise<string[]>
+
 export type helpOptions = {
   indent?: boolean
   name?: string
