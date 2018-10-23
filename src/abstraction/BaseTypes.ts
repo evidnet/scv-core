@@ -6,6 +6,37 @@ export interface Logger {
   error (str: string): void
 }
 
+export interface Caporal {
+  INTEGER: number
+  INT: number
+  FLOAT: number
+  BOOL: number
+  BOOLEAN: number
+  STRING: number
+  LIST: number
+  ARRAY: number
+  REPEATABLE: number
+  REQUIRED: number
+
+  version (ver: string): Caporal
+  version (): string
+  name (name: string): Caporal
+  name (): string
+  description (name: string): Caporal
+  description (): string
+  logger (logger: Logger): Caporal
+  logger (): Logger
+  bin (name: string): Caporal
+  bin (): string
+  help (helpText: string, helpOptions?: helpOptions): Caporal
+  command (synospis: string, description: string): Command
+  action (cb: ActionCallback): Caporal
+  option (synopsis: string, description: string, validator?: ValidatorArg, defaultValue?: any, required?: boolean): Caporal
+  argument (synopsis: string, description: string, validator?: ValidatorArg, defaultValue?: any): Command
+  parse (argv: string[]): any
+  fatalError (error: Error): void
+}
+
 export interface OptionModel {
   key: string
   description: string

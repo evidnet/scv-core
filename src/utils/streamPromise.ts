@@ -1,4 +1,4 @@
-import _ from 'caporal'
+import { Logger } from '../abstraction/BaseTypes'
 
 /**
  * Wrap Stream to Promise.

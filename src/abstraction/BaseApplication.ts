@@ -1,5 +1,6 @@
 import caporal from 'caporal'
 import { BaseCommand } from './BaseCommand'
+import { Caporal } from './BaseTypes'
 
 /**
  * Base Command-line Application Definition
