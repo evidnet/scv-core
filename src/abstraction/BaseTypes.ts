@@ -6,6 +6,17 @@ export interface Logger {
   error (str: string): void
 }
 
+export type helpOptions = {
+  indent?: boolean
+  name?: string
+}
+
+export type ActionCallback = (args: { [k: string]: any }, options: { [k: string]: any }, logger: Logger) => void
+
+export type ValidatorArg = string[] | string | RegExp | ValidatorFn | Number
+
+export type ValidatorFn = (str: string) => any
+
 export interface Caporal {
   INTEGER: number
   INT: number
@@ -31,7 +42,13 @@ export interface Caporal {
   help (helpText: string, helpOptions?: helpOptions): Caporal
   command (synospis: string, description: string): Command
   action (cb: ActionCallback): Caporal
-  option (synopsis: string, description: string, validator?: ValidatorArg, defaultValue?: any, required?: boolean): Caporal
+  option (
+    synopsis: string,
+    description: string,
+    validator?: ValidatorArg,
+    defaultValue?: any,
+    required?: boolean
+  ): Caporal
   argument (synopsis: string, description: string, validator?: ValidatorArg, defaultValue?: any): Command
   parse (argv: string[]): any
   fatalError (error: Error): void
