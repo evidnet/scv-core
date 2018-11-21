@@ -95,6 +95,14 @@ export abstract class BuildImageCommand extends BaseCommand {
     return []
   }
 
+  /**
+   * Can define options for build Docker image.
+   *
+   * @param {string} tag            Image's tag.
+   * @param {string} fileName       Dockerfile's name
+   * @returns
+   * @memberof BuildImageCommand
+   */
   getBuildOptions (tag: string, fileName: string) {
     return {
       t: tag,
