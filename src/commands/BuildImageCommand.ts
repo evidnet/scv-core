@@ -23,6 +23,14 @@ const createDirectory = util.promisify(fs.mkdir)
  */
 export abstract class BuildImageCommand extends BaseCommand {
   /**
+   * Shared Docker Instance in This Command
+   *
+   * @type {Docker}
+   * @memberof BuildImageCommand
+   */
+  docker: Docker = new Docker()
+
+  /**
    * Base Image for build. Default is 64-bit Ubuntu 18.04
    *
    * @type {string}
@@ -87,9 +95,15 @@ export abstract class BuildImageCommand extends BaseCommand {
     return []
   }
 
+  getBuildOptions (tag: string, fileName: string) {
+    return {
+      t: tag,
+      dockerfile: fileName
+    }
+  }
+
   async baseEvaluated (args: KVMap, options: KVMap, logger: Logger): Promise<void> {
     let remains = this.tags.length
-    const docker = new Docker()
     const tempPath = path.join(process.cwd(), './.tmp/')
 
     logger.info('------------------------------------------')
@@ -124,15 +138,12 @@ export abstract class BuildImageCommand extends BaseCommand {
 
         try {
           // build
-          const stream = await docker.buildImage(
+          const stream = await this.docker.buildImage(
             {
               context: tempPath,
               src: [].concat.apply([], [fileName, this.getSources()])
             },
-            {
-              t: `${this.imageName}:v${tag}`,
-              dockerfile: fileName
-            }
+            this.getBuildOptions(`${this.imageName}:v${tag}`, fileName)
           )
 
           // await build stream and remove
