@@ -7,9 +7,9 @@
 
 
 
-## Core 설계 및 API 사용법
+## 1. Core 설계 및 API 사용법
 
-### 프로젝트 컨셉과 기능
+### 1) 프로젝트 컨셉과 기능
 
 SCV 프로젝트는 "한번에 여러개의 Docker 이미지를 템플릿으로 손쉽게 뽑아낼 수는 없을까?"라는 생각에서 프로젝트를 만들게 되었습니다. SCV는 다음과 같은걸 지원합니다.
 
@@ -21,7 +21,7 @@ SCV 프로젝트는 "한번에 여러개의 Docker 이미지를 템플릿으로 
 
 
 
-### 베이스 기술
+### 2) 베이스 기술
 
 SCV 프로젝트는 다음 기술을 사용해 만들어졌습니다.
 
@@ -37,7 +37,7 @@ SCV 프로젝트는 다음 기술을 사용해 만들어졌습니다.
 
 
 
-### SCV를 사용한 콘솔 애플리케이션을 빠르게 만들어보기
+### 3) SCV를 사용한 콘솔 애플리케이션을 빠르게 만들어보기
 
 1. `BaseApplication`을 상속받은 애플리케이션 class를 만듭니다.
 2. 구현하고 싶은 Command를 다음과 같이 구현합니다.
@@ -50,7 +50,7 @@ SCV 프로젝트는 다음 기술을 사용해 만들어졌습니다.
 
 
 
-### 커맨드는 어떻게 만들어야할까요?
+### 4) 커맨드는 어떻게 만들어야할까요?
 
 1. `BaseCommand`의 항목들을 참고하세요.
 
@@ -91,7 +91,7 @@ SCV 프로젝트는 다음 기술을 사용해 만들어졌습니다.
 
 
 
-### `BuildImageCommand` 속에서 변수 치환하기
+### 5) `BuildImageCommand` 속에서 변수 치환하기
 
 `BuildImageCommand` 클래스 내에서는 다양한 변수 치환 방법을 제공합니다. `substituteMap` 프로퍼티를 통해 변수 정의 목록을 정의할 수 있습니다. `substituteMap`의 Key에는 `string`이, Value에는 `string` 혹은 `((tag: string, args?: KVMap, options?: KVMap) => string | Promise<string>)`이 올 수 있습니다.
 
@@ -151,8 +151,9 @@ const getVersion: TagValue = async (tag?: string) => {
 
 
 
-## `r-base`, `ohdsi-stack`사용법
+## 2. `r-base`, `ohdsi-stack`사용법
 
+### 1) 설치 및 기본 설명
 * **사전에 필요한 것**: scv-r-base로 빌드한 r-base 이미지가 로컬 Docker에 존재해야함.
 * **설치 방법**:
   * Repository를 클론한다.
@@ -163,3 +164,14 @@ const getVersion: TagValue = async (tag?: string) => {
   - Dockerfile 템플릿 및 스크립트 등은 assets 폴더 에 있음.
   - 빌드 로직을 수정하고 싶다면 `src/commands/BuildCommand.ts`를 수정하면 됨.
   - 이미지 업로드 로직을 수정하고 싶다면 `src/commands/PublishCommand.ts`를 수정하면 됨.
+
+### 2) 적용된 것들
+ - `ohdsi-stack`
+   1. Atlas의 자바스크립트 설정 파일을 자동으로 만들어주도록 변경했습니다.
+   2. `CDMResultsService.java` 파일을 패치해서 RC/DRC count가 0으로 나오는 문제를 해결했습니다.
+   3. tomcat을 켜고 끌 수 있는 커맨드와 초기 빌드용 커맨드를 추가하였습니다.
+   4. Concept 검색할 때 SQL 파일의 버그를 해결했습니다.
+   5. Tomcat에 넉넉하게 메모리를 줄 수 있도록 적용했습니다.
+ - `r-base`
+   1. Ubuntu 기반에 R은 컴파일을 통해 설치합니다.
+   2. OHDSI 관련 라이브러리들이 포함되도록 만들었습니다.

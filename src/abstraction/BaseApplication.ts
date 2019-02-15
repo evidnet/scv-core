@@ -13,6 +13,7 @@ export abstract class BaseApplication {
   abstract version: string
   abstract commands: BaseCommand[]
 
+  // 만든 커맨드를 Caporal을 통해 인식하도록 등록
   private injectCaporal (instance: Caporal, command: BaseCommand) {
     const caporalCommand = instance
       .command(command.getCommandName(), command.getCommandDescription())
